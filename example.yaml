@@ -18,23 +18,36 @@ spec:
       - name: web-app
         image: name:tag
         ports:
-        - containerPort: 8080
-        readinessProbe:
-          tcpSocket:
-            port: 8080
-          initialDelaySeconds: 5
-          periodSeconds: 10
+        - name: liveness-port
+          containerPort: 8080
+          hostPort: 8080
+        # Проверяет готовность пода
         livenessProbe:
-          tcpSocket:
-            port: 8080
-          initialDelaySeconds: 15
-          periodSeconds: 20
+          httpGet:
+            path: /healthz
+            port: liveness-port
+          # Кол-во ошибок
+          failureThreshold: 3
+          # Период проверки
+          periodSeconds: 10
+          # Сброс счётчика ошибок
+          successThreshold: 1
+        # Проверяет доступность приложения с максимальным дилэем (3*4=12) 12 секунд
+        startupProbe:
+          httpGet:
+            path: /healthz
+            port: liveness-port
+          failureThreshold: 3
+          periodSeconds: 4
+          
         resources:
           #  Резервируемые ресурсы пода на ноде
           requests:
-            cpu: 100m
+            cpu: 500m
             memory: 128M
           # Лимиты пода
           limits:
             cpu: 500m
             memory: 128M
+          # Благодаря одинаковым параметрам request и limits, QoS приоритет будет Guaranteed \
+          # эти поды будут иметь самый высокий приоритет в kubernetes
