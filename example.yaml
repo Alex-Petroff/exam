@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  # Имя инстанса
+  name: example-app
+spec:
+  # Кол-во подов
+  replicas: 4
+  selector:
+    matchLabels:
+      app: example-app
+  template:
+    metadata:
+      labels:
+        app: example-app
+    spec:
+      containers:
+      - name: web-app
+        image: name:tag
+        ports:
+        - name: http
+          containerPort: 7777
+        resources:
+          #  Резервируемые ресурсы пода на ноде
+          requests:
+            cpu: 100m
+            memory: 128M
+          # Лимиты пода
+          limits:
+            cpu: 500m
+            memory: 128M
